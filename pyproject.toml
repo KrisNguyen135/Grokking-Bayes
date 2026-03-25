@@ -34,6 +34,12 @@ dependencies = [
     "numba>=0.59.0",
 ]
 
+[dependency-groups]
+dev = ["pytest", "nbmake", "pytest-timeout"]
+
+[tool.pytest.ini_options]
+timeout = 3600  # 1 hour — accounts for Numba JIT warmup + MCMC sampling
+
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
 

@@ -102,7 +102,7 @@ def _(beta, differential_entropy, np, plt):
     for _ax, (label, dist) in zip(_axes, dists):
         pdf = dist.pdf(_x)
         diff_ent = differential_entropy(dist, _x)
-    
+
         _ax.plot(_x, pdf)
         _ax.set_title(f"{label}\n" + r"$H$" + f" = {diff_ent:.2f} bits")
         _ax.set_xlabel("x")

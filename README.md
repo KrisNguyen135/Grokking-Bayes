@@ -1,6 +1,6 @@
 # Grokking Bayes
 
-Companion code for the *Grokking Bayes* book — chapter-by-chapter Jupyter notebooks covering Bayesian inference from first principles to Bayesian neural networks.
+Companion code for the *Grokking Bayes* book — chapter-by-chapter [Marimo](https://marimo.io) notebooks covering Bayesian inference from first principles to Bayesian neural networks.
 
 ---
 
@@ -31,26 +31,28 @@ cd Grokking-Bayes
 # Install all dependencies into an isolated .venv
 uv sync
 
-# Register the Jupyter kernel
-uv run python -m ipykernel install --user --name grokking-bayes --display-name "Grokking Bayes (Python 3.10)"
+# Open a notebook for editing (browser UI)
+uv run marimo edit "ch02/01 - Tea vs. coffee.py"
 
-# Launch JupyterLab
-uv run jupyter lab
+# Or run as a read-only app
+uv run marimo run "ch02/01 - Tea vs. coffee.py"
 ```
-
-Select the **Grokking Bayes (Python 3.10)** kernel when opening any notebook.
 
 ---
 
 ## Running tests
 
-Notebooks can be executed top-to-bottom as automated tests using [nbmake](https://github.com/treebeardtech/nbmake):
+Notebooks are executed end-to-end as automated tests using `marimo export html`, which runs each notebook headlessly and fails on any cell error:
 
 ```bash
-uv run pytest --nbmake ch06/ ch07/ ch08/ ch10/ -v
+# Run all notebooks
+uv run pytest -v
+
+# Run a subset
+uv run pytest -v -k "ch06 or ch07"
 ```
 
-A 1-hour timeout per notebook is configured in `pyproject.toml` to account for MCMC sampling time.
+A 1-hour timeout per notebook is configured in `pyproject.toml` to account for MCMC sampling time. The data-download notebook (`ch09/00.1 - Mona Loa download.py`) is excluded from the test suite as it requires network access.
 
 ---
 
@@ -69,3 +71,4 @@ A 1-hour timeout per notebook is configured in `pyproject.toml` to account for M
 | ch10 | Bayesian neural networks |
 | ch11 | Hypothesis testing & Bayes factors |
 | ch12 | Decision making under uncertainty |
+| ch13 | Active learning — binary search |

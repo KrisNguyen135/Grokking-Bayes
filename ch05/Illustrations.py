@@ -7,6 +7,7 @@ app = marimo.App()
 @app.cell
 def _():
     import numpy as np
+    from pathlib import Path
     from scipy.stats import beta
 
     import pymc as pm
@@ -22,7 +23,7 @@ def _():
     plt.rcParams['legend.fontsize'] = 12
     plt.rcParams['axes.edgecolor'] = 'black'
     plt.rcParams['axes.linewidth'] = 1.2
-    return beta, np, plt, pm
+    return Path, beta, np, plt, pm
 
 
 @app.cell
@@ -53,16 +54,14 @@ def _(k, n, pm, prior_a, prior_b):
 
 
 @app.cell
-def _(np, post_samples):
-    from pathlib import Path
+def _(Path, np, post_samples):
     post_samples_1 = post_samples['posterior'].p.data.flatten()
     np.save(Path(__file__).parent / 'p_post_samples.npy', post_samples_1)
-    return
+    return (post_samples_1,)
 
 
 @app.cell
-def _(np):
-    from pathlib import Path
+def _(Path, np, post_samples_1):
     post_samples_2 = np.load(Path(__file__).parent / 'p_post_samples.npy')
     return (post_samples_2,)
 
@@ -97,9 +96,8 @@ def _(beta, post_a, post_b, post_samples_2):
 
 
 @app.cell
-def _(beta, np, plt, post_a, post_b):
+def _(Path, beta, np, plt, post_a, post_b, post_samples_1):
     iid_samples = beta.rvs(post_a, post_b, size=10000, random_state=0)
-    from pathlib import Path
     post_samples_3 = np.load(Path(__file__).parent / 'p_post_samples.npy')
     (fig, axes) = plt.subplots(2, 2, figsize=(10, 6), sharey='row', sharex=True)
     ax = axes[0, 0]

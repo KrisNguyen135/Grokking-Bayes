@@ -10,14 +10,7 @@ def _notebooks():
     return sorted(nb for nb in root.glob("ch*/*.py") if nb.name not in skip)
 
 
-@pytest.fixture(
-    params=_notebooks(),
-    ids=lambda p: str(p.relative_to(Path(__file__).parent)),
-)
-def notebook(request):
-    return request.param
-
-
+@pytest.mark.parametrize("notebook", _notebooks(), ids=lambda p: str(p.relative_to(Path(__file__).parent)))
 def test_notebook_runs(notebook, tmp_path):
     result = subprocess.run(
         ["uv", "run", "marimo", "export", "html", str(notebook), "-o", str(tmp_path / "out.html")],

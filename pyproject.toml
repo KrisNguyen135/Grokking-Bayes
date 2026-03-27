@@ -1,25 +1,12 @@
 [project]
 name = "grokking-bayes"
 version = "0.1.0"
-description = "Grokking Bayes — educational Jupyter notebooks"
+description = "Grokking Bayes — educational Marimo notebooks"
 requires-python = ">=3.10,<3.11"
 dependencies = [
     "arviz==0.22.0",
-    "ipykernel==6.29.5",
-    "ipython==8.37.0",
-    "ipywidgets==8.1.7",
-    "jupyter-client==8.6.3",
-    "jupyter-core==5.8.1",
-    "jupyter-events==0.12.0",
-    "jupyter-lsp==2.2.5",
-    "jupyter-server==2.16.0",
-    "jupyter-server-terminals==0.5.3",
-    "jupyterlab==4.4.4",
-    "jupyterlab-pygments==0.3.0",
-    "jupyterlab-server==2.27.3",
-    "jupyterlab-widgets==3.0.15",
+    "marimo>=0.9.0",
     "matplotlib==3.10.3",
-    "matplotlib-inline==0.1.7",
     "numpy>=1.26.0,<2.0",
     "pandas==2.3.0",
     "pymc==5.25.1",
@@ -32,11 +19,10 @@ dependencies = [
     "xarray==2025.6.1",
     "xarray-einstats==0.8.0",
     "numba>=0.59.0",
-    "marimo>=0.9.0",
 ]
 
 [dependency-groups]
-dev = ["pytest", "nbmake", "pytest-timeout"]
+dev = ["pytest", "pytest-timeout"]
 
 [tool.pytest.ini_options]
 timeout = 3600  # 1 hour — accounts for Numba JIT warmup + MCMC sampling

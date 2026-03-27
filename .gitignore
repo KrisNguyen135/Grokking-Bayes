@@ -7,3 +7,4 @@ wandb/
 .vscode
 print.py
 .venv/
+__marimo__

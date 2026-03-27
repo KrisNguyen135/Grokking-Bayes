@@ -54,14 +54,16 @@ def _(k, n, pm, prior_a, prior_b):
 
 @app.cell
 def _(np, post_samples):
+    from pathlib import Path
     post_samples_1 = post_samples['posterior'].p.data.flatten()
-    np.save('./p_post_samples.npy', post_samples_1)
+    np.save(Path(__file__).parent / 'p_post_samples.npy', post_samples_1)
     return
 
 
 @app.cell
 def _(np):
-    post_samples_2 = np.load('./p_post_samples.npy')
+    from pathlib import Path
+    post_samples_2 = np.load(Path(__file__).parent / 'p_post_samples.npy')
     return (post_samples_2,)
 
 
@@ -97,7 +99,8 @@ def _(beta, post_a, post_b, post_samples_2):
 @app.cell
 def _(beta, np, plt, post_a, post_b):
     iid_samples = beta.rvs(post_a, post_b, size=10000, random_state=0)
-    post_samples_3 = np.load('./p_post_samples.npy')
+    from pathlib import Path
+    post_samples_3 = np.load(Path(__file__).parent / 'p_post_samples.npy')
     (fig, axes) = plt.subplots(2, 2, figsize=(10, 6), sharey='row', sharex=True)
     ax = axes[0, 0]
     ax.set_title('Ideal: i.i.d. samples')

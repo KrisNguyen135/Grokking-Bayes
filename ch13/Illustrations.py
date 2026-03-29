@@ -114,6 +114,34 @@ def _(beta, differential_entropy, np, plt):
 
 
 @app.cell
+def _(np, plt):
+    _n = 100
+
+    _uniform = np.ones(_n) / _n
+    _x = np.arange(_n) + 1
+
+    plt.bar(_x, _uniform)
+    plt.ylim(0, 0.02)
+    plt.show()
+    return
+
+
+@app.cell
+def _(np, plt):
+    _n = 50
+
+    _uniform = np.ones(_n) / _n
+    _x = np.arange(_n) + 1
+
+    plt.bar(_x, _uniform)
+    plt.plot(np.arange(100) + 1, [0] * 100, alpha=0)
+    # plt.xlim(-5, 106)
+    plt.ylim(0, 0.04)
+    plt.show()
+    return
+
+
+@app.cell
 def _():
     return
 

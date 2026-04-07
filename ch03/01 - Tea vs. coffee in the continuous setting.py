@@ -197,5 +197,64 @@ def _(beta, k, n, plt, ps):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Exercise
+
+    Adjust the prior hyperparameters $\alpha$ and $\beta$ to explore different prior
+    shapes and their effect on the posterior. Try uniform, bimodal, or strongly
+    opinionated priors.
+
+    Then increase the sample size $n$ to observe how more data leads to a sharper,
+    more concentrated posterior whose peak becomes narrow and tall.
+
+    The **observed proportion** $\hat{p}$ controls what fraction of the $n$ trials
+    were successes: the integer count is $k = \text{round}(\hat{p} \times n)$,
+    so $k$ is always bounded between $0$ and $n$.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    prior_a_slider = mo.ui.slider(start=0.1, stop=10.0, step=0.1, value=1.0, label="Prior α")
+    prior_b_slider = mo.ui.slider(start=0.1, stop=10.0, step=0.1, value=1.0, label="Prior β")
+    n_slider = mo.ui.slider(start=1, stop=200, step=1, value=5, label="Sample size n")
+    p_hat_slider = mo.ui.slider(start=0.0, stop=1.0, step=0.01, value=0.6, label="Observed proportion p̂")
+    mo.output.replace(mo.vstack([
+        mo.hstack([prior_a_slider, prior_b_slider], justify="start"),
+        mo.hstack([n_slider, p_hat_slider], justify="start"),
+    ]))
+    return n_slider, p_hat_slider, prior_a_slider, prior_b_slider
+
+
+@app.cell
+def _(beta, n_slider, p_hat_slider, plt, prior_a_slider, prior_b_slider, ps):
+    _prior_a = prior_a_slider.value
+    _prior_b = prior_b_slider.value
+    _n = n_slider.value
+    _k = round(p_hat_slider.value * _n)
+
+    _prior = beta.pdf(ps, _prior_a, _prior_b)
+    _post_a = _prior_a + _k
+    _post_b = _prior_b + (_n - _k)
+    _posterior = beta.pdf(ps, _post_a, _post_b)
+
+    _fig, _ax = plt.subplots(figsize=(8, 5))
+    _ax.fill_between(ps, 0, _prior, color="blue", alpha=0.6,
+                     label=f"Prior Beta({_prior_a:.1f}, {_prior_b:.1f})", edgecolor="k")
+    _ax.fill_between(ps, _posterior, color='red', alpha=0.6,
+                     label=f"Posterior Beta({_post_a:.1f}, {_post_b:.1f})",
+                     hatch="//", edgecolor="k")
+    _ax.set_xlabel(r'$p$')
+    _ax.set_ylabel('Probability density')
+    _ax.set_title(f'n={_n}, k={_k} (p̂={p_hat_slider.value:.2f})')
+    _ax.legend()
+    plt.tight_layout()
+    plt.show()
+    return
+
+
 if __name__ == "__main__":
     app.run()

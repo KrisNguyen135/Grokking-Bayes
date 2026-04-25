@@ -85,14 +85,6 @@ def _(az, plt, samples):
 
 
 @app.cell
-def _(az, plt, samples):
-    az.plot_trace(samples)
-    plt.tight_layout()
-    plt.show()
-    return
-
-
-@app.cell
 def _(model, pm, samples):
     with model:
         ppc_samples = pm.sample_posterior_predictive(samples)

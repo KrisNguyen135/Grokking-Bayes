@@ -45,7 +45,7 @@ def _(pm, sigma, y):
     with pm.Model() as pooled:
         _theta = pm.Normal('theta', 0, sigma=1000000.0)
         _obs = pm.Normal('obs', _theta, sigma=sigma, observed=y)
-        trace_p = pm.sample(random_state=0)
+        trace_p = pm.sample(random_seed=0)
     return (trace_p,)
 
 
@@ -69,7 +69,7 @@ def _(pm, sigma, y):
         tau = pm.HalfNormal('tau', 100)
         _theta = pm.Normal('theta', mu=mu, sigma=tau, shape=len(y))
         _obs = pm.Normal('obs', _theta, sigma=sigma, observed=y)
-        trace_h = pm.sample(draws=10000, target_accept=0.9, random_state=0)
+        trace_h = pm.sample(draws=10000, target_accept=0.9, random_seed=0)
     return (trace_h,)
 
 

@@ -1,7 +1,6 @@
 .DS_Store
 data/
 __pycache__/
-.ipynb_checkpoints/
 __marimo__/
 wandb/
 .vscode

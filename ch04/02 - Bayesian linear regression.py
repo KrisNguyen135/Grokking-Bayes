@@ -195,7 +195,7 @@ def _(np, plt, post_mu_quad, post_sigma2_quad, sigma2_noise, x_1, y_quad):
 
 
 @app.cell
-def _(y_quad, y_mean_quad, y_stddev_quad):
+def _(y_mean_quad, y_quad, y_stddev_quad):
     (
         (y_quad < y_mean_quad + 2 * y_stddev_quad)
         * (y_quad > y_mean_quad - 2 * y_stddev_quad)
@@ -204,7 +204,7 @@ def _(y_quad, y_mean_quad, y_stddev_quad):
 
 
 @app.cell
-def _(plt, y_quad, y_mean_quad, y_stddev_quad):
+def _(plt, y_mean_quad, y_quad, y_stddev_quad):
     plt.hist((y_quad - y_mean_quad) / y_stddev_quad, density=True)
     plt.show()
     return
@@ -218,6 +218,11 @@ def _(plt, post_y_samples_quad, x_1, y_quad):
     plt.ylabel('Price')
     plt.legend()
     plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

@@ -135,10 +135,10 @@ def _(
 
 
 @app.cell
-def _(bfs, experiments, n_experiments, p_values, plt):
+def _(bfs, experiments, n_experiments, np, p_values, plt):
     fig, axes = plt.subplots(1, 2, figsize=(10,4))
 
-    axes[0].plot(p_values)
+    axes[0].bar(np.arange(len(experiments)), p_values)
     axes[0].axhline(0.05, linestyle="--", c="r")
     axes[0].set_ylabel(r"$p$-value")
     axes[0].set_xticks(

@@ -7,6 +7,7 @@ app = marimo.App()
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -64,7 +65,7 @@ def _(np):
     sigma_noise = 20000
     noise = np.random.normal(0, sigma_noise, size=x.shape)
     y = true_w * x + noise
-    return noise, sigma_noise, true_w, x, y
+    return sigma_noise, x, y
 
 
 @app.cell
@@ -106,6 +107,7 @@ def _(pm, sigma_noise, x, y):
 @app.cell
 def _(az, normal_samples):
     az.summary(normal_samples, var_names=['m'])
+    return
 
 
 @app.cell
@@ -203,6 +205,7 @@ def _(np, pm, sigma_noise, x, y):
 @app.cell
 def _(az, lognormal_samples):
     az.summary(lognormal_samples, var_names=['m'])
+    return
 
 
 @app.cell
@@ -250,6 +253,11 @@ def _(az, lognormal_samples, normal_samples, plt):
     _axes[1].set_title('LogNormal prior')
     plt.tight_layout()
     plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

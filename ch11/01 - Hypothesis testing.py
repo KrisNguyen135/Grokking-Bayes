@@ -125,7 +125,7 @@ def _(
         running_k = running_k + k_1
         _test = binomtest(k_1, n_1, baseline, alternative='greater')
         _p_value = _test.pvalue
-        _bf = np.exp(log_marginal_likelihood_constant(running_k, running_n, baseline) - log_marginal_likelihood_beta(k_1, n_1, running_a, running_b))
+        _bf = np.exp(log_marginal_likelihood_constant(running_k, running_n, baseline) - log_marginal_likelihood_beta(running_k, running_n, running_a, running_b))
         p_values.append(_p_value)
         bfs.append(_bf)
         running_a = running_a + k_1

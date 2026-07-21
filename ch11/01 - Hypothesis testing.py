@@ -131,7 +131,7 @@ def _(
         running_a = running_a + k_1
         running_b = running_b + (n_1 - k_1)
     (running_a, running_b)
-    return bfs, k_1, n_1, p_values
+    return bfs, p_values
 
 
 @app.cell
@@ -169,11 +169,11 @@ def _(mo):
 
 
 @app.cell
-def _(k_1, n_1):
+def _(k, n):
     prior_a = 1
     prior_b = 1
-    a = prior_a + k_1
-    b = prior_b + n_1 - k_1
+    a = prior_a + k
+    b = prior_b + n - k
     return a, b
 
 
@@ -186,6 +186,11 @@ def _(a, b, beta):
 @app.cell
 def _(a, b, beta):
     beta(a, b).cdf(0.05)
+    return
+
+
+@app.cell
+def _():
     return
 
 

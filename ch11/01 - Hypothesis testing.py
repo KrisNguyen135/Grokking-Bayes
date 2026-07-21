@@ -77,7 +77,7 @@ def _(
     np,
 ):
     _bf = np.exp(log_marginal_likelihood_constant(k, n, baseline) - log_marginal_likelihood_beta(k, n, 1, 1))
-    _bf  # - log_marginal_likelihood_beta(k, n, 1000, 9000)
+    _bf
     return
 
 

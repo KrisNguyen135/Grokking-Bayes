@@ -6,6 +6,13 @@ app = marimo.App()
 
 @app.cell
 def _():
+    import marimo as mo
+
+    return
+
+
+@app.cell
+def _():
     import numpy as np
     from scipy.stats import beta
     import matplotlib.pyplot as plt
@@ -32,7 +39,7 @@ def _(np):
 
     baseline = 0.1
     N = 10_000
-    V = 50  # 50 or 100
+    V = 100  # 50 or 100
     C = 20_000
 
 
@@ -120,6 +127,11 @@ def _(launch_utility_samples, no_launch_utility_grid, plt):
     plt.xlabel("Utility ($)")
     plt.ylabel("Frequency")
     plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

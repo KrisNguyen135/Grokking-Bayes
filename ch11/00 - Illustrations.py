@@ -63,14 +63,14 @@ def _(beta, np, plt):
     n_1 = 500
     successes = 63
     failures = n_1 - successes
-    a_prior = 1000
-    # Prior Beta(1,1)
-    b_prior = 9000
-    a_post = 1000
-    b_post = 9000
-    # Posterior parameters
+
+    # Prior
+    a = 1000
+    b = 9000
+
+    # Plotting
     p = np.linspace(0.05, 0.18, 1000)
-    posterior = beta.pdf(p, a_post, b_post)
+    posterior = beta.pdf(p, a, b)
     (fig, axes) = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
     # Grid for p
     axes[0].axvline(0.1, linewidth=4)
@@ -81,7 +81,7 @@ def _(beta, np, plt):
     axes[0].set_xlim(0.05, 0.18)
     axes[1].plot(p, posterior, linewidth=3)
     # --- H0 subplot ---
-    axes[1].set_title('$H_1$: $r \\sim$Beta(' + str(a_post) + ', ' + str(b_post) + ')')
+    axes[1].set_title('$H_1$: $r \\sim$Beta(' + str(a) + ', ' + str(b) + ')')
     axes[1].set_xlabel('Conversion rate $r$')
     axes[1].set_xlim(0.05, 0.18)
     plt.tight_layout()
@@ -91,6 +91,11 @@ def _(beta, np, plt):
     # axes[1].set_ylim(0, 2)
     # axes[1].axvline(successes/n, linestyle="--")
     plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

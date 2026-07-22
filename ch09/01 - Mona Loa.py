@@ -61,13 +61,13 @@ def _(np, z_obs):
     # Process variance for 1D random walk:
     # Use variance of first differences
     diffs = np.diff(y)
-    Q_1d = np.var(diffs)
+    S = np.var(diffs)
 
     # Process variance for 2D model:
     # Separate level and slope noise scales
     Q_level = 0.1 * np.var(diffs)
     Q_slope = 0.01 * np.var(np.diff(diffs)) if len(diffs) > 1 else 1e-4
-    return Q_1d, Q_level, Q_slope, R, diffs, y
+    return S, Q_level, Q_slope, R, diffs, y
 
 
 @app.cell
@@ -77,35 +77,35 @@ def _():
 
 
 @app.cell
-def _(Q_1d, R, n, np, y):
+def _(S, R, n, np, y):
     # ==================================
     # 1D RANDOM WALK MODEL
-    mu_1d = np.zeros(n)
-    P_1d = np.zeros(n)
-    pred_mean_1d = np.zeros(n)
-    pred_var_1d = np.zeros(n)
-    mu_1d[0] = y[0]
-    P_1d[0] = np.var(y)
+    x_mean = np.zeros(n)
+    x_var = np.zeros(n)
+    y_mean = np.zeros(n)
+    y_var = np.zeros(n)
+    x_mean[0] = y[0]
+    x_var[0] = np.var(y)
     gains = []
     for _t in range(1, n):
-        _mu_pred = mu_1d[_t - 1]
-        _P_pred = P_1d[_t - 1] + Q_1d
-        pred_mean_1d[_t] = _mu_pred
-        pred_var_1d[_t] = _P_pred + R
+        _mu_pred = x_mean[_t - 1]
+        _P_pred = x_var[_t - 1] + S
+        y_mean[_t] = _mu_pred
+        y_var[_t] = _P_pred + R
         K = _P_pred / (_P_pred + R)
-        mu_1d[_t] = _mu_pred + K * (y[_t] - _mu_pred)
-        P_1d[_t] = (1 - K) * _P_pred
+        x_mean[_t] = _mu_pred + K * (y[_t] - _mu_pred)
+        x_var[_t] = (1 - K) * _P_pred
         gains.append(K)  # ---- Prediction ----  # predictive variance of y_t  # ---- Update ----
-    return P_1d, gains, mu_1d, pred_mean_1d
+    return x_var, gains, x_mean, y_mean
 
 
 @app.cell
-def _(mu_1d, plt, pred_mean_1d, years, z_obs):
+def _(x_mean, plt, y_mean, years, z_obs):
     _snapshot_times = [1, 2, 10, 40]
     for _t in _snapshot_times:
         plt.figure()
-        plt.scatter(years[_t], pred_mean_1d[_t], marker='x', s=100, label='Prediction')
-        plt.scatter(years[_t], mu_1d[_t], s=100, marker='D', label='(Filtered) posterior')
+        plt.scatter(years[_t], y_mean[_t], marker='x', s=100, label='Prediction')
+        plt.scatter(years[_t], x_mean[_t], s=100, marker='D', label='(Filtered) posterior')
         plt.scatter(years[:_t + 1], z_obs[:_t + 1], c='k', label='Observations')
         if _t < 5:  # plt.errorbar(years[t], pred_mean_1d[t], yerr=np.sqrt(pred_var_1d[t]), marker="x", capsize=5, label="Prediction")
             plt.xticks(years[:_t + 1])
@@ -116,10 +116,10 @@ def _(mu_1d, plt, pred_mean_1d, years, z_obs):
 
 
 @app.cell
-def _(mu_1d, plt, pred_mean_1d, years, z_obs):
+def _(x_mean, plt, y_mean, years, z_obs):
     plt.figure()
-    plt.plot(years[1:], pred_mean_1d[1:], linestyle="--", label="Prediction")
-    plt.plot(years, mu_1d, label="(Filtered) Posterior")
+    plt.plot(years[1:], y_mean[1:], linestyle="--", label="Prediction")
+    plt.plot(years, x_mean, label="(Filtered) Posterior")
     plt.scatter(years, z_obs, c="k", label="Observation")
     plt.legend()
     plt.title("Predict vs Update")
@@ -206,14 +206,14 @@ def _(np, plt):
 
 
 @app.cell
-def _(P_1d, Q_1d, R, forecast_and_plot, mu_1d, y, years):
+def _(x_var, S, R, forecast_and_plot, x_mean, y, years):
     forecast_and_plot(
         1976,
         years,
         y,
-        mu_1d,
-        P_1d,
-        Q_1d,
+        x_mean,
+        x_var,
+        S,
         R
     )
     return
@@ -236,8 +236,8 @@ def _(Q_level, Q_slope, R, diffs, n, np, y):
         _P_pred = F @ P_2d[_t - 1] @ F.T + Q
         pred_mean_2d[_t] = (H @ _mu_pred)[0]
         pred_var_2d[_t] = (H @ _P_pred @ H.T)[0, 0] + R
-        S = H @ _P_pred @ H.T + R
-        K_1 = _P_pred @ H.T @ np.linalg.inv(S)
+        _S = H @ _P_pred @ H.T + R
+        K_1 = _P_pred @ H.T @ np.linalg.inv(_S)
         innovation = y[_t] - H @ _mu_pred
         mu_2d[_t] = _mu_pred + K_1.flatten() * innovation
         P_2d[_t] = (np.eye(2) - K_1 @ H) @ _P_pred

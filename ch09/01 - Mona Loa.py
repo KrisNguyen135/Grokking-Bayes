@@ -160,8 +160,7 @@ def _(np, plt):
 
         for k in range(1, len(future_years)):
 
-            # Random walk prediction
-            mu_fore = mu_fore
+            # Random walk: mean is unchanged, variance grows by Q each step
             P_fore = P_fore + Q
 
             state_mean[k] = mu_fore

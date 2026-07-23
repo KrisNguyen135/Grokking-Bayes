@@ -120,7 +120,19 @@ def _(np, plt):
     _uniform = np.ones(_n) / _n
     _x = np.arange(_n) + 1
 
-    plt.bar(_x, _uniform)
+    # plt.bar(_x, _uniform)
+    # plt.ylim(0, 0.02)
+    # plt.show()
+
+    plt.bar(
+        _x,
+        _uniform,
+        width=0.5,
+        linewidth=0,
+        antialiased=False,
+    )
+
+    plt.xlim(0, _n + 1)
     plt.ylim(0, 0.02)
     plt.show()
     return
@@ -133,9 +145,9 @@ def _(np, plt):
     _uniform = np.ones(_n) / _n
     _x = np.arange(_n) + 1
 
-    plt.bar(_x, _uniform)
-    plt.plot(np.arange(100) + 1, [0] * 100, alpha=0)
-    # plt.xlim(-5, 106)
+    plt.bar(_x + 50, _uniform, width=0.2, linewidth=0)
+    # plt.plot(np.arange(100) + 1, [0] * 100, alpha=0)
+    plt.xlim(0, 101)
     plt.ylim(0, 0.04)
     plt.show()
     return

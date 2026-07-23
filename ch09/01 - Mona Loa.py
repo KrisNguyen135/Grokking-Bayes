@@ -71,12 +71,6 @@ def _(np, z_obs):
 
 
 @app.cell
-def _():
-    # Q_1d = 10.0
-    return
-
-
-@app.cell
 def _(Q_1d, R, n, np, y):
     # ==================================
     # 1D RANDOM WALK MODEL

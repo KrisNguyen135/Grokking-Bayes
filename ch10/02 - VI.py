@@ -38,7 +38,7 @@ def _(np):
 
     sigma_true = 0.2
     y = y_true + np.random.normal(0, sigma_true, size=y_true.shape)
-    return x, y
+    return x, y, sigma_true
 
 
 @app.cell
@@ -59,7 +59,7 @@ def _(x, y):
 
 
 @app.cell
-def _(n_hidden, pm, pt, x_data, y_data):
+def _(n_hidden, pm, pt, sigma_true, x_data, y_data):
     with pm.Model() as vi_bnn:
         x_shared = pm.Data("x_shared", x_data)
 
@@ -71,16 +71,12 @@ def _(n_hidden, pm, pt, x_data, y_data):
         w2 = pm.Normal("w2", 0, 1, shape=(n_hidden,))
         b2 = pm.Normal("b2", 0, 1)
 
-        # # Global observation noise
-        sigma = pm.HalfNormal("sigma", 1.0)
-
         # Forward pass
         hidden = pt.tanh(pt.dot(x_shared, w1) + b1)
         mu = pt.dot(hidden, w2) + b2
 
-        # Likelihood
-        # y_obs = pm.Normal("y_obs", mu=mu, sigma=sigma_true, observed=y_data, shape=x_shared.shape[0])
-        y_obs = pm.Normal("y_obs", mu=mu, sigma=sigma, observed=y_data, shape=x_shared.shape[0])
+        # Likelihood — fixed, known observation noise
+        y_obs = pm.Normal("y_obs", mu=mu, sigma=sigma_true, observed=y_data, shape=x_shared.shape[0])
 
         approx = pm.fit(
             n=200_000,

@@ -125,7 +125,7 @@ def _(torch):
 @app.cell
 def _(model, torch, x_test):
     # Prediction with MC Dropout (approximate posterior)
-    model.train()
+    model.train()  # Keep train mode active so dropout stays enabled (MC Dropout)
     T = 2000  # number of MC samples
     with torch.no_grad():
         predictions = torch.stack([model(x_test) for _ in range(T)])

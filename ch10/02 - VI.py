@@ -153,25 +153,5 @@ def _(plt, pred_mean, pred_std, x, x_test, y, y_test):
     return
 
 
-@app.cell
-def _(plt, pred_mean, pred_std, x, x_test, y, y_test):
-    plt.scatter(x, y, alpha=0.4, label="Observed data")
-    plt.plot(x_test, y_test, color="black", linewidth=2, label="True function")
-
-    plt.plot(x_test, pred_mean, label="Predictive mean")
-    plt.fill_between(
-        x_test.flatten(),
-        pred_mean - 2*pred_std,
-        pred_mean + 2*pred_std,
-        alpha=0.3,
-        label="95% predictive interval"
-    )
-
-    plt.legend()
-    plt.title("Bayesian Neural Network (ADVI)")
-    plt.show()
-    return
-
-
 if __name__ == "__main__":
     app.run()

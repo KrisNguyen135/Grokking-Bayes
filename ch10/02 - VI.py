@@ -79,7 +79,7 @@ def _(n_hidden, plt, pm, pt, sigma_true, x, x_data, x_test, y, y_data, y_test):
         _mu = pt.dot(_hidden, _w2) + _b2
 
         # Likelihood — fixed, known observation noise
-        y_obs = pm.Normal("y_obs", mu=_mu, sigma=sigma_true, observed=y_data, shape=_x_shared.shape[0])
+        _y_obs = pm.Normal("y_obs", mu=_mu, sigma=sigma_true, observed=y_data, shape=_x_shared.shape[0])
 
         _approx = pm.fit(
             n=200_000,
@@ -159,8 +159,8 @@ def _(n_hidden, plt, pm, pt, x, x_data, x_test, y, y_data, y_test):
         _hidden = pt.tanh(pt.dot(_x_shared, _w1) + _b1)
         _mu = pt.dot(_hidden, _w2) + _b2
 
-        # Likelihood — fixed, known observation noise
-        y_obs = pm.Normal("y_obs", mu=_mu, sigma=_sigma, observed=y_data, shape=_x_shared.shape[0])
+        # Likelihood — unknown observation noise
+        _y_obs = pm.Normal("y_obs", mu=_mu, sigma=_sigma, observed=y_data, shape=_x_shared.shape[0])
 
         _approx = pm.fit(
             n=200_000,

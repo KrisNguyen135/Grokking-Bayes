@@ -149,7 +149,7 @@ def _(n_hidden, plt, pm, pt, x, x_data, x_test, y, y_data, y_test):
         _hidden = pt.tanh(pt.dot(_x_shared, _w1) + _b1)
         _mu = pt.dot(_hidden, _w2) + _b2
 
-        # Likelihood — fixed, known observation noise
+        # Likelihood — unknown observation noise
         _y_obs = pm.Normal("y_obs", mu=_mu, sigma=_sigma, observed=y_data, shape=_x_shared.shape[0])
 
         _trace = pm.sample(2000, tune=2000, target_accept=0.95)

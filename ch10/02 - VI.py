@@ -38,7 +38,7 @@ def _(np):
 
     sigma_true = 0.2
     y = y_true + np.random.normal(0, sigma_true, size=y_true.shape)
-    return x, y, sigma_true
+    return sigma_true, x, y
 
 
 @app.cell
@@ -50,95 +50,70 @@ def _():
 
 
 @app.cell
-def _(x, y):
+def _(np, x, y):
     x_data = x.astype("float32")
     y_data = y.flatten().astype("float32")
 
     n_hidden = 20
-    return n_hidden, x_data, y_data
+
+    x_test = np.linspace(-5, 5, 101).reshape(-1, 1)
+    y_test = np.sin(x_test)
+    return n_hidden, x_data, x_test, y_data, y_test
 
 
 @app.cell
-def _(n_hidden, pm, pt, sigma_true, x_data, y_data):
+def _(n_hidden, plt, pm, pt, sigma_true, x, x_data, x_test, y, y_data, y_test):
     with pm.Model() as vi_bnn:
-        x_shared = pm.Data("x_shared", x_data)
+        _x_shared = pm.Data("x_shared", x_data)
 
         # First layer
-        w1 = pm.Normal("w1", 0, 1, shape=(1, n_hidden))
-        b1 = pm.Normal("b1", 0, 1, shape=(n_hidden,))
+        _w1 = pm.Normal("w1", 0, 1, shape=(1, n_hidden))
+        _b1 = pm.Normal("b1", 0, 1, shape=(n_hidden,))
 
         # Output layer
-        w2 = pm.Normal("w2", 0, 1, shape=(n_hidden,))
-        b2 = pm.Normal("b2", 0, 1)
+        _w2 = pm.Normal("w2", 0, 1, shape=(n_hidden,))
+        _b2 = pm.Normal("b2", 0, 1)
 
         # Forward pass
-        hidden = pt.tanh(pt.dot(x_shared, w1) + b1)
-        mu = pt.dot(hidden, w2) + b2
+        _hidden = pt.tanh(pt.dot(_x_shared, _w1) + _b1)
+        _mu = pt.dot(_hidden, _w2) + _b2
 
         # Likelihood — fixed, known observation noise
-        y_obs = pm.Normal("y_obs", mu=mu, sigma=sigma_true, observed=y_data, shape=x_shared.shape[0])
+        _y_obs = pm.Normal("y_obs", mu=_mu, sigma=sigma_true, observed=y_data, shape=_x_shared.shape[0])
 
-        approx = pm.fit(
+        _approx = pm.fit(
             n=200_000,
             obj_n_mc=10,
             obj_optimizer=pm.adam(learning_rate=1e-3),
         )
-    return approx, vi_bnn
 
+        vi_bnn.set_data("x_shared", x_test.astype("float32"))
+        _trace_vi = _approx.sample(2000)
+        _posterior_pred = pm.sample_posterior_predictive(_trace_vi)
 
-@app.cell
-def _(approx, plt):
-    plt.plot(approx.hist)
+    plt.plot(_approx.hist)
     plt.title("ELBO Convergence")
     plt.show()
-    return
 
-
-@app.cell
-def _(approx, plt):
-    plt.plot(approx.hist)
+    plt.plot(_approx.hist)
     plt.title("ELBO Convergence")
     plt.ylim(0, 200)
     plt.xticks(rotation=90)
     plt.show()
-    return
 
+    _y_samples = _posterior_pred.posterior_predictive["y_obs"].data
 
-@app.cell
-def _(np):
-    x_test = np.linspace(-5, 5, 101).reshape(-1, 1)
-    y_test = np.sin(x_test)
-    return x_test, y_test
+    _pred_mean = _y_samples.mean(axis=(0, 1))
+    _pred_std = _y_samples.std(axis=(0, 1))
 
-
-@app.cell
-def _(approx, pm, vi_bnn, x_test):
-    with vi_bnn:
-        vi_bnn.set_data("x_shared", x_test.astype("float32"))
-        trace_vi = approx.sample(2000)
-        posterior_pred = pm.sample_posterior_predictive(trace_vi)
-    return (posterior_pred,)
-
-
-@app.cell
-def _(posterior_pred):
-    y_samples = posterior_pred.posterior_predictive["y_obs"].data
-
-    pred_mean = y_samples.mean(axis=(0, 1))
-    pred_std = y_samples.std(axis=(0, 1))
-    return pred_mean, pred_std
-
-
-@app.cell
-def _(plt, pred_mean, pred_std, x, x_test, y, y_test):
     plt.scatter(x, y, alpha=0.4, label="Observed data")
     plt.plot(x_test, y_test, color="black", linewidth=2, label="True function")
 
-    plt.plot(x_test, pred_mean, label="Predictive mean")
+    plt.plot(x_test, _pred_mean, label="Predictive mean")
     plt.fill_between(
         x_test.flatten(),
-        pred_mean - 2*pred_std,
-        pred_mean + 2*pred_std,
+        _pred_mean - 2*_pred_std,
+        _pred_mean + 2*_pred_std,
         alpha=0.3,
         label="95% predictive interval"
     )
@@ -146,6 +121,92 @@ def _(plt, pred_mean, pred_std, x, x_test, y, y_test):
     plt.legend()
     plt.title("Bayesian Neural Network (ADVI)")
     plt.show()
+    return
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Unknown noise
+    """)
+    return
+
+
+@app.cell
+def _(n_hidden, plt, pm, pt, x, x_data, x_test, y, y_data, y_test):
+    with pm.Model() as unknown_noise_vi_bnn:
+        _x_shared = pm.Data("x_shared", x_data)
+
+        # First layer
+        _w1 = pm.Normal("w1", 0, 1, shape=(1, n_hidden))
+        _b1 = pm.Normal("b1", 0, 1, shape=(n_hidden,))
+
+        # Output layer
+        _w2 = pm.Normal("w2", 0, 1, shape=(n_hidden,))
+        _b2 = pm.Normal("b2", 0, 1)
+
+        # Unknown noise
+        _sigma = pm.HalfNormal("sigma", 1.0)
+
+        # Forward pass
+        _hidden = pt.tanh(pt.dot(_x_shared, _w1) + _b1)
+        _mu = pt.dot(_hidden, _w2) + _b2
+
+        # Likelihood — unknown observation noise
+        _y_obs = pm.Normal("y_obs", mu=_mu, sigma=_sigma, observed=y_data, shape=_x_shared.shape[0])
+
+        _approx = pm.fit(
+            n=200_000,
+            obj_n_mc=10,
+            obj_optimizer=pm.adam(learning_rate=1e-3),
+        )
+
+        unknown_noise_vi_bnn.set_data("x_shared", x_test.astype("float32"))
+        _trace_vi = _approx.sample(2000)
+        _posterior_pred = pm.sample_posterior_predictive(_trace_vi)
+
+    plt.plot(_approx.hist)
+    plt.title("ELBO Convergence")
+    plt.show()
+
+    plt.plot(_approx.hist)
+    plt.title("ELBO Convergence")
+    plt.ylim(0, 200)
+    plt.xticks(rotation=90)
+    plt.show()
+
+    _y_samples = _posterior_pred.posterior_predictive["y_obs"].data
+
+    _pred_mean = _y_samples.mean(axis=(0, 1))
+    _pred_std = _y_samples.std(axis=(0, 1))
+
+    plt.scatter(x, y, alpha=0.4, label="Observed data")
+    plt.plot(x_test, y_test, color="black", linewidth=2, label="True function")
+
+    plt.plot(x_test, _pred_mean, label="Predictive mean")
+    plt.fill_between(
+        x_test.flatten(),
+        _pred_mean - 2*_pred_std,
+        _pred_mean + 2*_pred_std,
+        alpha=0.3,
+        label="95% predictive interval"
+    )
+
+    plt.legend()
+    plt.title("Bayesian Neural Network (ADVI) with unknown noise")
+    plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

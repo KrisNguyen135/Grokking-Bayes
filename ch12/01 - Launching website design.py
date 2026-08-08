@@ -150,6 +150,19 @@ def _(V_explore, a, b, beta, k, n, np, plt, utility_launch, utility_no_launch):
     no_launch_utility_explore = utility_no_launch(r_grid_explore, V_explore.value)
     posterior_pdf_explore = beta.pdf(r_grid_explore, a + k, b + n - k)
 
+    # Pin the utility axis to the range spanned across the whole slider (not
+    # just the current value), so moving the slider visibly reshapes the
+    # curves instead of only relabeling an autoscaled axis.
+    _bounds = [
+        utility_launch(r_grid_explore, V_explore.start),
+        utility_launch(r_grid_explore, V_explore.stop),
+        utility_no_launch(r_grid_explore, V_explore.start),
+        utility_no_launch(r_grid_explore, V_explore.stop),
+    ]
+    _y_min = min(_b.min() for _b in _bounds)
+    _y_max = max(_b.max() for _b in _bounds)
+    _y_margin = 0.05 * (_y_max - _y_min)
+
     utility_color_explore, posterior_color_explore = "tab:blue", "tab:orange"
     fig2, ax1_explore = plt.subplots()
     ax1_explore.plot(r_grid_explore, launch_utility_explore, color=utility_color_explore, label="Utility (launch)")
@@ -157,6 +170,7 @@ def _(V_explore, a, b, beta, k, n, np, plt, utility_launch, utility_no_launch):
     ax1_explore.set_xlabel("Conversion rate r")
     ax1_explore.set_ylabel("Utility ($)", color=utility_color_explore)
     ax1_explore.tick_params(axis='y', labelcolor=utility_color_explore)
+    ax1_explore.set_ylim(_y_min - _y_margin, _y_max + _y_margin)
 
     ax2_explore = ax1_explore.twinx()
     ax2_explore.plot(r_grid_explore, posterior_pdf_explore, linestyle='--', color=posterior_color_explore, label="Density")

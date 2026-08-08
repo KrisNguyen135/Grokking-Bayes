@@ -138,7 +138,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    V_explore = mo.ui.slider(start=50, stop=150, step=10, value=100, label="Value per conversion V ($)")
+    V_explore = mo.ui.slider(start=50, stop=150, step=10, value=100, debounce=True, label="Value per conversion V ($)")
     V_explore
     return (V_explore,)
 

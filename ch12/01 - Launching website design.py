@@ -8,7 +8,7 @@ app = marimo.App()
 def _():
     import marimo as mo
 
-    return
+    return (mo,)
 
 
 @app.cell
@@ -39,25 +39,25 @@ def _(np):
 
     baseline = 0.1
     N = 10_000
-    V = 100  # 50 or 100
+    V = 100  # fixed value matching the text
     C = 20_000
 
 
-    def utility_launch(r):
+    def utility_launch(r, V):
         return N * r * V - C
 
-    def utility_no_launch(r):
+    def utility_no_launch(r, V):
         return np.ones_like(r) * N * baseline * V
 
-    return a, b, k, n, utility_launch, utility_no_launch
+    return a, b, k, n, utility_launch, utility_no_launch, V
 
 
 @app.cell
-def _(a, b, beta, k, n, np, utility_launch, utility_no_launch):
+def _(V, a, b, beta, k, n, np, utility_launch, utility_no_launch):
     r_grid = np.linspace(0, 1, 101)
 
-    launch_utility_grid = utility_launch(r_grid)
-    no_launch_utility_grid = utility_no_launch(r_grid)
+    launch_utility_grid = utility_launch(r_grid, V)
+    no_launch_utility_grid = utility_no_launch(r_grid, V)
 
     posterior_pdf = beta.pdf(r_grid, a + k, b + n - k)
     return launch_utility_grid, no_launch_utility_grid, posterior_pdf, r_grid
@@ -102,9 +102,9 @@ def _(a, b, k, n, np):
 
 
 @app.cell
-def _(r_samples, utility_launch, utility_no_launch):
-    launch_utility_samples = utility_launch(r_samples)
-    no_launch_utility_samples = utility_no_launch(r_samples)
+def _(V, r_samples, utility_launch, utility_no_launch):
+    launch_utility_samples = utility_launch(r_samples, V)
+    no_launch_utility_samples = utility_no_launch(r_samples, V)
 
     launch_expected_utility = launch_utility_samples.mean()
     no_launch_expected_utility = no_launch_utility_samples.mean()
@@ -127,6 +127,63 @@ def _(launch_utility_samples, no_launch_utility_grid, plt):
     plt.xlabel("Utility ($)")
     plt.ylabel("Frequency")
     plt.show()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("## Explore: how does the value per conversion affect the decision?")
+    return
+
+
+@app.cell
+def _(mo):
+    V_explore = mo.ui.slider(start=50, stop=150, step=10, value=100, label="Value per conversion V ($)")
+    V_explore
+    return (V_explore,)
+
+
+@app.cell
+def _(V_explore, a, b, beta, k, n, np, plt, utility_launch, utility_no_launch):
+    r_grid_explore = np.linspace(0, 1, 101)
+    launch_utility_explore = utility_launch(r_grid_explore, V_explore.value)
+    no_launch_utility_explore = utility_no_launch(r_grid_explore, V_explore.value)
+    posterior_pdf_explore = beta.pdf(r_grid_explore, a + k, b + n - k)
+
+    utility_color_explore, posterior_color_explore = "tab:blue", "tab:orange"
+    fig2, ax1_explore = plt.subplots()
+    ax1_explore.plot(r_grid_explore, launch_utility_explore, color=utility_color_explore, label="Utility (launch)")
+    ax1_explore.axhline(no_launch_utility_explore[0], linestyle=':', color=utility_color_explore, alpha=0.5, label="Utility (no launch)")
+    ax1_explore.set_xlabel("Conversion rate r")
+    ax1_explore.set_ylabel("Utility ($)", color=utility_color_explore)
+    ax1_explore.tick_params(axis='y', labelcolor=utility_color_explore)
+
+    ax2_explore = ax1_explore.twinx()
+    ax2_explore.plot(r_grid_explore, posterior_pdf_explore, linestyle='--', color=posterior_color_explore, label="Density")
+    ax2_explore.set_ylabel("Density", color=posterior_color_explore)
+    ax2_explore.tick_params(axis='y', labelcolor=posterior_color_explore)
+
+    lines_1_explore, labels_1_explore = ax1_explore.get_legend_handles_labels()
+    lines_2_explore, labels_2_explore = ax2_explore.get_legend_handles_labels()
+    ax1_explore.legend(lines_1_explore + lines_2_explore, labels_1_explore + labels_2_explore, loc="center right")
+    plt.title(f"Utility and PDF as functions of r (V = ${V_explore.value})")
+    plt.show()
+    return
+
+
+@app.cell
+def _(V_explore, mo, r_samples, utility_launch, utility_no_launch):
+    launch_eu = utility_launch(r_samples, V_explore.value).mean()
+    no_launch_eu = utility_no_launch(r_samples, V_explore.value).mean()
+    mo.md(
+        f"""
+        With V = ${V_explore.value}:
+
+        - Expected utility (launch): **{launch_eu:,.0f}**
+        - Expected utility (no launch): **{no_launch_eu:,.0f}**
+        - Difference: **{launch_eu - no_launch_eu:,.0f}**
+        """
+    )
     return
 
 

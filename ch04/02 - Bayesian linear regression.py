@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.25.1"
 app = marimo.App()
 
 
@@ -51,9 +51,9 @@ def _():
 def _(mu, norm, np, sigma2):
     seed = 0
     x = np.linspace(500, 2500, 10)  # square footage
-    _noise = norm.rvs(0, 20000, size=10000, random_state=seed)
+    _noise = norm.rvs(0, 20000, size=(10000, x.size), random_state=seed)
     prior_m_samples = norm.rvs(mu, np.sqrt(sigma2), size=10000, random_state=seed)
-    prior_y_samples = prior_m_samples.reshape(-1, 1) * x.reshape(1, -1) + _noise.reshape(-1, 1)
+    prior_y_samples = prior_m_samples.reshape(-1, 1) * x.reshape(1, -1) + _noise
     prior_y_samples.shape
     return prior_y_samples, seed, x
 

@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.25.1"
 app = marimo.App()
 
 
@@ -47,7 +47,7 @@ def _(np, plt, z_obs):
 
 
 @app.cell
-def _(np, z_obs):
+def _(z_obs):
     y = z_obs
 
     # -----------------------------
@@ -56,22 +56,33 @@ def _(np, z_obs):
 
     # Observation variance R:
     # Estimate as small fraction of total variance (annual averages are low noise)
-    R = 0.05 * np.var(y)
+    # R = 0.05 * np.var(y)
+    R = 10
 
     # Process variance for 1D random walk:
     # Use variance of first differences
-    diffs = np.diff(y)
-    S = np.var(diffs)
+    # diffs = np.diff(y)
+    # S = np.var(diffs)
+    S = 1
 
     # Process variance for 2D model:
     # Separate level and slope noise scales
-    Q_level = 0.1 * np.var(diffs)
-    Q_slope = 0.01 * np.var(np.diff(diffs)) if len(diffs) > 1 else 1e-4
-    return S, Q_level, Q_slope, R, diffs, y
+    # Q_level = 0.1 * np.var(diffs)
+    # Q_slope = 0.01 * np.var(np.diff(diffs)) if len(diffs) > 1 else 1e-4
+    Q_level = 0.05
+    Q_slope = 0.005
+
+    print(
+        R,
+        S,
+        Q_level,
+        Q_slope
+    )
+    return Q_level, Q_slope, R, S, y
 
 
 @app.cell
-def _(Q_1d, R, n, np, y):
+def _(R, S, n, np, y):
     # ==================================
     # 1D RANDOM WALK MODEL
     x_mean = np.zeros(n)
@@ -79,7 +90,8 @@ def _(Q_1d, R, n, np, y):
     y_mean = np.zeros(n)
     y_var = np.zeros(n)
     x_mean[0] = y[0]
-    x_var[0] = np.var(y)
+    # x_var[0] = np.var(y)
+    x_var[0] = R
     gains = []
     for _t in range(1, n):
         _mu_pred = x_mean[_t - 1]
@@ -90,11 +102,11 @@ def _(Q_1d, R, n, np, y):
         x_mean[_t] = _mu_pred + K * (y[_t] - _mu_pred)
         x_var[_t] = (1 - K) * _P_pred
         gains.append(K)  # ---- Prediction ----  # predictive variance of y_t  # ---- Update ----
-    return x_var, gains, x_mean, y_mean
+    return gains, x_mean, x_var, y_mean
 
 
 @app.cell
-def _(x_mean, plt, y_mean, years, z_obs):
+def _(plt, x_mean, y_mean, years, z_obs):
     _snapshot_times = [1, 2, 10, 40]
     for _t in _snapshot_times:
         plt.figure()
@@ -110,7 +122,7 @@ def _(x_mean, plt, y_mean, years, z_obs):
 
 
 @app.cell
-def _(x_mean, plt, y_mean, years, z_obs):
+def _(plt, x_mean, y_mean, years, z_obs):
     plt.figure()
     plt.plot(years[1:], y_mean[1:], linestyle="--", label="Prediction")
     plt.plot(years, x_mean, label="(Filtered) Posterior")
@@ -199,7 +211,7 @@ def _(np, plt):
 
 
 @app.cell
-def _(x_var, S, R, forecast_and_plot, x_mean, y, years):
+def _(R, S, forecast_and_plot, x_mean, x_var, y, years):
     forecast_and_plot(
         1976,
         years,
@@ -213,13 +225,14 @@ def _(x_var, S, R, forecast_and_plot, x_mean, y, years):
 
 
 @app.cell
-def _(Q_level, Q_slope, R, diffs, n, np, y):
+def _(Q_level, Q_slope, R, n, np, y):
     mu_2d = np.zeros((n, 2))
     P_2d = np.zeros((n, 2, 2))
     pred_mean_2d = np.zeros(n)
     pred_var_2d = np.zeros(n)
     mu_2d[0, 0] = y[0]
-    mu_2d[0, 1] = diffs[0] if len(diffs) > 0 else 0.0
+    # mu_2d[0, 1] = diffs[0] if len(diffs) > 0 else 0.0
+    mu_2d[0, 1] = 0
     P_2d[0] = np.eye(2) * np.var(y)
     F = np.array([[1, 1], [0, 1]])
     H = np.array([[1, 0]])
@@ -351,6 +364,11 @@ def _(P_2d, R, future_years, mu_2d, np, obs_mean, obs_var, plt, y, years):
     plt.title("Forecast Starting at 1976")
     plt.legend()
     plt.show()
+    return
+
+
+@app.cell
+def _():
     return
 
 

@@ -53,22 +53,11 @@ def _(z_obs):
     # -----------------------------
     # Hyperparameter Estimation
     # -----------------------------
-
-    # Observation variance R:
-    # Estimate as small fraction of total variance (annual averages are low noise)
-    # R = 0.05 * np.var(y)
     R = 10
-
-    # Process variance for 1D random walk:
-    # Use variance of first differences
-    # diffs = np.diff(y)
-    # S = np.var(diffs)
-    S = 1
+    S = 10
 
     # Process variance for 2D model:
     # Separate level and slope noise scales
-    # Q_level = 0.1 * np.var(diffs)
-    # Q_slope = 0.01 * np.var(np.diff(diffs)) if len(diffs) > 1 else 1e-4
     Q_level = 0.05
     Q_slope = 0.005
 
